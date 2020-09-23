@@ -5,9 +5,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import java.util.ArrayList;
 import com.example.granja.R;
 import com.example.granja.dto.Animal;
 
@@ -16,7 +18,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class AnimalAdapter extends BaseAdapter {
+public class AnimalAdapter extends BaseAdapter implements Filterable {
     private final Context context;
     private final LayoutInflater inflater;
     private List<Animal> animalesOut;
@@ -30,6 +32,7 @@ public class AnimalAdapter extends BaseAdapter {
     }
     @Override
     public int getCount() {
+
         return animalesOut.size();
     }
 
@@ -59,6 +62,43 @@ public class AnimalAdapter extends BaseAdapter {
         return convertView;
     }
 
+    @Override
+    public Filter getFilter() {
+        Filter filter = new Filter() {
+            @SuppressWarnings("unchecked")
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                animalesOut = (List<Animal>) results.values;
+                notifyDataSetChanged();
+            }
+
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                FilterResults results = new FilterResults();
+                List<Animal> FilteredArrList = new ArrayList<>();
+                if (animalesIn == null) {
+                    animalesIn = new ArrayList<>(animalesOut);
+                }
+                if (constraint == null || constraint.length() == 0) {
+                    results.count = animalesIn.size();
+                    results.values = animalesIn;
+                } else {
+
+                    constraint = constraint.toString().toLowerCase();
+                    for (int i = 0; i < animalesIn.size(); i++) {
+                        String data = animalesIn.get(i).getNombre();
+                        if (data.toLowerCase().contains(constraint.toString())) {
+                            FilteredArrList.add(animalesIn.get(i));
+                        }
+                    }
+                    results.count = FilteredArrList.size();
+                    results.values = FilteredArrList;
+                }
+                return results;
+            }
+        };
+        return filter;
+    }
 
 
     class ViewHolder{

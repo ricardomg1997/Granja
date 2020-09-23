@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -25,38 +26,48 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.lvAnimales)
     public ListView lvAnimales;
-    private AnimalAdapter animalAdapter;
     @BindView(R.id.txtBuscar)
     public EditText txtBuscar;
+    private AnimalAdapter animalAdapter;
+    List<Animal> listaAnimales;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
         initComponents();
         loadInfo();
+        buscarOnTextListener();
+        setOnClickListener();
+    }
+
+    private void buscarOnTextListener() {
         txtBuscar.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
             }
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                animalAdapter.getTextFilter().filter(charSequence);
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+                animalAdapter.getFilter().filter(charSequence);
             }
 
             @Override
-            public void afterTextChanged(Editable editable) {
+            public void afterTextChanged(Editable s) {
 
             }
         });
+
+
     }
 
     private void initComponents() {
         ButterKnife.bind(this);
     }
     private void loadInfo(){
-        List<Animal> listaAnimales = new ArrayList<>();
+        listaAnimales = new ArrayList<>();
         listaAnimales.add(new Animal("Perro", R.raw.ladrido_perro, R.drawable.perro, "Un perro"));
         listaAnimales.add(new Animal("Gato", R.raw.maullido_gato, R.drawable.gato, "Un gato"));
         listaAnimales.add(new Animal("Gallo", R.raw.canto_gallo, R.drawable.gallo, "Un gallo"));
@@ -65,10 +76,14 @@ public class MainActivity extends AppCompatActivity {
         lvAnimales.setAdapter(animalAdapter);
     }
 
-    public void onClickConstrain(View view) {
-                if(){
-            MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(R.raw.ladrido_perro));
-            mediaPlayer.start();
-        }
+    private void setOnClickListener () {
+        lvAnimales.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Animal animal = listaAnimales.get(i);
+                MediaPlayer mediaPlayer = MediaPlayer.create(getApplicationContext(), animal.getSonido());
+                mediaPlayer.start();
+            }
+        });
     }
 }
